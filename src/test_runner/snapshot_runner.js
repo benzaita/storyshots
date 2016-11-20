@@ -1,10 +1,8 @@
 /* eslint class-methods-use-this:0 */
 
 import path from 'path';
-import { SnapshotState } from 'jest-snapshot';
-import ReactTestRenderer from 'react-test-renderer';
-import diff from 'jest-diff';
 import promptly from 'promptly';
+import { diff, render, SnapshotState } from './jest-snapshot-runner'
 
 export default class SnapshotRunner {
   constructor({ configDir, update, updateInteractive, storyshotDir, extension }) {
@@ -56,9 +54,7 @@ export default class SnapshotRunner {
     const state = this.state;
     const key = story.name;
     const context = { kind: this.kind, story: story.name };
-    const tree = story.render(context);
-    const renderer = ReactTestRenderer.create(tree);
-    const actual = renderer.toJSON();
+    const actual = render(story, context)
 
     const result = state.match(story.name, actual, key);
 
