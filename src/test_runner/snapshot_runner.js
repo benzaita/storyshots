@@ -2,7 +2,7 @@
 
 import path from 'path';
 import promptly from 'promptly';
-import { diff, render, SnapshotState } from './jest-snapshot-runner'
+import { diff, render, SnapshotState } from './image-snapshot-runner'
 
 export default class SnapshotRunner {
   constructor({ configDir, update, updateInteractive, storyshotDir, extension }) {
