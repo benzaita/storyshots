@@ -1,5 +1,6 @@
 import chalk from 'chalk';
-import SnapshotRunner from './snapshot_runner';
+// import SnapshotRunner from './snapshot_runner';
+import VisualRunner from './visual_runner';
 
 function logState({ state, name, message }) {
   switch (state) {
@@ -31,7 +32,7 @@ function logState({ state, name, message }) {
       process.stdout.write(chalk.underline(name));
       break;
     default:
-      process.stdout.write(`Error occured when testing ${state}`);
+      process.stdout.write(`Error occured when testing ${state}: ${message}`);
   }
   process.stdout.write('\n');
 }
@@ -71,7 +72,7 @@ export default class Runner {
       extension = 'shot',
     } = options;
 
-    this.runner = new SnapshotRunner(
+    this.runner = new VisualRunner(
       { configDir, update, updateInteractive, storyshotDir, extension });
   }
 
@@ -104,8 +105,10 @@ export default class Runner {
         this.updateState({ state: 'started-kind', name: group.kind });
         for (const story of group.stories) {
           try {
-            const result = await this.runner.runStory(story);
-            this.updateState({ ...result, name: story.name });
+            const results = await this.runner.runStory(story);
+            for (const r of results) {
+              this.updateState({ name: story.name, ...r });
+            }
           } catch (err) {
             // Error on story
             this.updateState({ state: 'errored', message: err, name: story.name });

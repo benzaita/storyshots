@@ -1,0 +1,9 @@
+{
+  "resolutions": [
+    "350x520", "40x40"
+  ],
+
+  "diff": {
+    "threshold": 0.1
+  }
+}
