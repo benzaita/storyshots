@@ -1,7 +1,7 @@
 import path from 'path'
 import Pageres from 'pageres'
 import {existsSync, readFileSync, copySync, mkdirpSync, removeSync} from 'fs-extra'
-import BlinkDiff from 'blink-diff'
+import imageDiff from 'image-diff';
 import promptly from 'promptly';
 import sanitize from 'sanitize-filename'
 
@@ -20,10 +20,6 @@ class VisualRunner {
     this.updateInteractive = updateInteractive
 
     this.options = {
-      diff: {
-        thresholdType: BlinkDiff.THRESHOLD_PERCENT,
-        threshold: 0.1
-      },
       resolutions: [],
       port: 9010,
       ...readJsonIfExists(path.resolve(this.storyshotDir, 'storyshots.json'))
@@ -75,7 +71,7 @@ class VisualRunner {
 
     shotsWithoutRefs.forEach(addReferenceShot)
 
-    const compareResults = await Promise.all(shotsWithRefs.map(compareWithReference(this.options.diff)))
+    const compareResults = await Promise.all(shotsWithRefs.map(compareWithReference))
 
     const mismatchedResults = compareResults.filter((r) => r.isMismatch)
     debug(mismatchedResults)
@@ -163,23 +159,21 @@ const removeSpaces = (str) => str.replace(/\s/g,'_')
 
 const filenameToResolution = (filename) => (/\.([0-9]+x[0-9]+)\.png$/.exec(filename)[1])
 
-const compareWithReference = ({options}) => ({name, current, reference, diff}) => {
-  const blinkdiff = new BlinkDiff({
-    imageAPath: current,
-    imageBPath: reference,
-    imageOutputPath: diff,
-
-    ...options
-  })
-
+const compareWithReference = ({name, current, reference, diff}) => {
   return new Promise((resolve, reject) => {
-    blinkdiff.run((err, result) => {
+    imageDiff({
+      expectedImage: reference,
+      actualImage: current,
+      diffImage: diff,
+      shadow: true
+    }, (err, imagesAreSame) => {
       if (err) {
         reject(err)
-      } else {
+      }
+      else {
         resolve({
-          name: name,
-          isMismatch: result.code !== BlinkDiff.RESULT_IDENTICAL,
+          name,
+          isMismatch: !imagesAreSame,
           current,
           reference,
           diff
