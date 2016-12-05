@@ -148,7 +148,7 @@ const generateStorybookUrl = (kind, story, {port}) => (
 const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0}) => {
   const pageres = new Pageres({
     delay,
-    filename: `${baseFilename}.<%= size %>`
+    filename: removeSpaces(baseFilename) + `.<%= size %>`
   })
 
   pageres.src(url, resolutions)
@@ -159,6 +159,8 @@ const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0
     name: `${baseFilename} (${filenameToResolution(s.filename)})`
   })))
 }
+
+const removeSpaces = (str) => str.replace(/\s/g,'_')
 
 const filenameToResolution = (filename) => (/\.([0-9]+x[0-9]+)\.png$/.exec(filename)[1])
 
