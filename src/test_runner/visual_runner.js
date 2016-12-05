@@ -134,10 +134,9 @@ const readJsonIfExists = (filename) => (
 const generateStorybookUrl = (kind, story, {port}) => (
   'http://localhost:' +
   port +
-  '/iframe.html?selectedKind=' + 
-  encodeURIComponent(kind) + 
-  '&selectedStory=' +
-  encodeURIComponent(story)
+  '/iframe.html?inStoryshots' +
+  '&selectedKind=' + encodeURIComponent(kind) + 
+  '&selectedStory=' + encodeURIComponent(story)
 )
 
 const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0}) => {

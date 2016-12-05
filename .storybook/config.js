@@ -4,6 +4,12 @@
 // Do not modify this file.
 
 import { configure, getStorybook } from '@kadira/storybook';
+import { exportStories, runningInStoryshots, disableRafAnimations, disableCssAnimations } from './storyshots-helpers';
+
+if (runningInStoryshots()) {
+  disableRafAnimations()
+  disableCssAnimations()
+}
 
 function loadStories() {
   require('../examples');
@@ -11,4 +17,4 @@ function loadStories() {
 
 configure(loadStories, module);
 
-global.storybook = getStorybook()
+exportStories(getStorybook())
