@@ -138,11 +138,10 @@ const readJsonIfExists = (filename) => (
 const generateStorybookUrl = (kind, story, {port}) => (
   'http://localhost:' +
   port +
-  '/?selectedKind=' + 
+  '/iframe.html?selectedKind=' + 
   encodeURIComponent(kind) + 
   '&selectedStory=' +
-  encodeURIComponent(story) +
-  '&full=1'
+  encodeURIComponent(story)
 )
 
 const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0}) => {
@@ -151,7 +150,7 @@ const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0
     filename: removeSpaces(baseFilename) + `.<%= size %>`
   })
 
-  pageres.src(url, resolutions)
+  pageres.src(url, resolutions, { crop: false })
   pageres.dest(destDir)
 
   return pageres.run().then(streams => streams.map(s => ({
