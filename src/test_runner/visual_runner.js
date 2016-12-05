@@ -25,6 +25,7 @@ class VisualRunner {
         threshold: 0.1
       },
       resolutions: [],
+      port: 9010,
       ...readJsonIfExists(path.resolve(this.storyshotDir, 'storyshots.json'))
     }
     debug('options:', this.options)
@@ -52,7 +53,7 @@ class VisualRunner {
   }
 
   async runStory(story) {
-    const url = generateStorybookUrl(this.currentKind, story.name)
+    const url = generateStorybookUrl(this.currentKind, story.name, this.options)
 
     const screenshots = await captureScreenshots({
       url,
@@ -134,8 +135,10 @@ const readJsonIfExists = (filename) => (
   existsSync(filename) ? JSON.parse(readFileSync(filename)) : {}
 )
 
-const generateStorybookUrl = (kind, story) => (
-  'http://localhost:9010/?selectedKind=' + 
+const generateStorybookUrl = (kind, story, {port}) => (
+  'http://localhost:' +
+  port +
+  '/?selectedKind=' + 
   encodeURIComponent(kind) + 
   '&selectedStory=' +
   encodeURIComponent(story) +
