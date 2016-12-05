@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import runTests from './test_runner';
-import { getStorybook } from '@kadira/storybook';
+import { configure, getStorybook } from '@kadira/storybook';
 import Runner from './test_runner';
 import path from 'path';
 import program from 'commander';
@@ -9,7 +9,11 @@ import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import loadBabelConfig from '@kadira/storybook/dist/server/babel_config';
 import { filterStorybook } from './util';
-import runWithRequireContext from './require_context';
+import loadConfig from '@kadira/storybook/dist/server/config';
+import getBaseConfig from '@kadira/storybook/dist/server/config/webpack.config.prod';
+import vm from 'vm';
+import fs from 'fs';
+import webpack from 'webpack';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -41,27 +45,6 @@ const {
 
 const configPath = path.resolve(configDir, 'config.js');
 
-const babelConfig = loadBabelConfig(configDir);
-
-// cacheDir is webpack babel loader specific. We don't run webpack.
-delete babelConfig.cacheDirectory;
-
-require('babel-register')(babelConfig);
-require('babel-polyfill');
-
-// load loaders
-const loaders = require(path.resolve(loadersPath));
-
-Object.keys(loaders).forEach(ext => {
-  const loader = loaders[ext];
-  require.extensions[`.${ext}`] = (m, filepath) => {
-    m.exports = loader(filepath);
-  };
-})
-
-// load polyfills
-require(path.resolve(polyfillsPath));
-
 // set userAgent so storybook knows we're storyshots
 if(!global.navigator) {
   global.navigator = {}
@@ -78,13 +61,30 @@ async function main() {
     const channel = new EventEmitter();
     addons.setChannel(channel);
 
-    const content = babel.transformFileSync(configPath, babelConfig).code;
-    const contextOpts = {
-      filename: configPath,
-      dirname: path.resolve(configDir),
-    };
-    runWithRequireContext(content, contextOpts);
-    const storybook = require('@kadira/storybook').getStorybook();
+    const config = loadConfig('PRODUCTION', getBaseConfig(), configDir);
+    config.output = {
+      path: path.resolve(configDir, './webpack'),
+      filename: 'bundle.js'
+    }
+    config.entry = path.resolve(configDir, 'config.js')
+
+    const compiler = webpack(config);
+    const stats = await new Promise((resolve, reject) => {
+      compiler.run((err, stats) => {
+        if (err)
+          reject(err)
+        else
+          resolve(stats)
+      })
+    })
+
+    const content = fs.readFileSync(path.resolve(config.output.path, config.output.filename))
+
+    require(path.resolve(polyfillsPath));
+    vm.runInThisContext(content);
+
+    const storybook = global.storybook;
+
     const result = await runner.run(filterStorybook(storybook, grep, exclude));
     const fails = result.errored + result.unmatched;
     const exitCode = fails > 0 ? 1: 0;
