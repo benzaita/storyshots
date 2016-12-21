@@ -83,7 +83,7 @@ var VisualRunner = function () {
 
     this.options = (0, _extends3.default)({
       resolutions: [],
-      port: 9010
+      storybookBaseUrl: process.env.STORYBOOK_BASE_URL || 'http://localhost:9010'
     }, readJsonIfExists(_path2.default.resolve(this.storyshotDir, 'storyshots.json')));
     debug('options:', this.options);
   }
@@ -381,8 +381,8 @@ var readJsonIfExists = function readJsonIfExists(filename) {
 };
 
 var generateStorybookUrl = function generateStorybookUrl(kind, story, _ref10) {
-  var port = _ref10.port;
-  return 'http://localhost:' + port + '/iframe.html?inStoryshots' + '&selectedKind=' + encodeURIComponent(kind) + '&selectedStory=' + encodeURIComponent(story);
+  var storybookBaseUrl = _ref10.storybookBaseUrl;
+  return storybookBaseUrl + '/iframe.html?inStoryshots' + '&selectedKind=' + encodeURIComponent(kind) + '&selectedStory=' + encodeURIComponent(story);
 };
 
 var captureScreenshots = function captureScreenshots(_ref11) {

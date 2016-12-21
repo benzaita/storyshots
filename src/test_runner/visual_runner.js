@@ -21,7 +21,7 @@ class VisualRunner {
 
     this.options = {
       resolutions: [],
-      port: 9010,
+      storybookBaseUrl: process.env.STORYBOOK_BASE_URL || 'http://localhost:9010',
       ...readJsonIfExists(path.resolve(this.storyshotDir, 'storyshots.json'))
     }
     debug('options:', this.options)
@@ -131,9 +131,8 @@ const readJsonIfExists = (filename) => (
   existsSync(filename) ? JSON.parse(readFileSync(filename)) : {}
 )
 
-const generateStorybookUrl = (kind, story, {port}) => (
-  'http://localhost:' +
-  port +
+const generateStorybookUrl = (kind, story, {storybookBaseUrl}) => (
+  storybookBaseUrl +
   '/iframe.html?inStoryshots' +
   '&selectedKind=' + encodeURIComponent(kind) + 
   '&selectedStory=' + encodeURIComponent(story)
