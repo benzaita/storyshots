@@ -93,11 +93,11 @@ var VisualRunner = function () {
     value: function startKind(kind) {
       this.currentKind = kind;
 
-      var sanitizedKind = (0, _sanitizeFilename2.default)(kind);
+      var normalizedKind = normalizeFilename(kind);
 
-      this.currentShotsDir = _path2.default.resolve(this.currentShotsBaseDir, sanitizedKind);
-      this.refShotsDir = _path2.default.resolve(this.refShotsBaseDir, sanitizedKind);
-      this.diffsDir = _path2.default.resolve(this.diffsBaseDir, sanitizedKind);
+      this.currentShotsDir = _path2.default.resolve(this.currentShotsBaseDir, normalizedKind);
+      this.refShotsDir = _path2.default.resolve(this.refShotsBaseDir, normalizedKind);
+      this.diffsDir = _path2.default.resolve(this.diffsBaseDir, normalizedKind);
 
       (0, _fsExtra.removeSync)(this.currentShotsDir);
       (0, _fsExtra.removeSync)(this.diffsDir);
@@ -125,7 +125,7 @@ var VisualRunner = function () {
                 _context.next = 3;
                 return captureScreenshots((0, _extends3.default)({
                   url: url,
-                  baseFilename: (0, _sanitizeFilename2.default)('' + story.name),
+                  baseName: story.name,
                   destDir: this.currentShotsDir
                 }, this.options));
 
@@ -387,7 +387,7 @@ var generateStorybookUrl = function generateStorybookUrl(kind, story, _ref10) {
 
 var captureScreenshots = function captureScreenshots(_ref11) {
   var url = _ref11.url,
-      baseFilename = _ref11.baseFilename,
+      baseName = _ref11.baseName,
       destDir = _ref11.destDir,
       _ref11$resolutions = _ref11.resolutions,
       resolutions = _ref11$resolutions === undefined ? [] : _ref11$resolutions,
@@ -396,7 +396,7 @@ var captureScreenshots = function captureScreenshots(_ref11) {
 
   var pageres = new _pageres2.default({
     delay: delay,
-    filename: removeSpaces(baseFilename) + '.<%= size %>'
+    filename: normalizeFilename(baseName) + '.<%= size %>'
   });
 
   pageres.src(url, resolutions, { crop: false });
@@ -406,10 +406,14 @@ var captureScreenshots = function captureScreenshots(_ref11) {
     return streams.map(function (s) {
       return {
         filename: s.filename,
-        name: baseFilename + ' (' + filenameToResolution(s.filename) + ')'
+        name: baseName + ' (' + filenameToResolution(s.filename) + ')'
       };
     });
   });
+};
+
+var normalizeFilename = function normalizeFilename(str) {
+  return (0, _sanitizeFilename2.default)(removeSpaces(str)).toLowerCase();
 };
 
 var removeSpaces = function removeSpaces(str) {

@@ -30,11 +30,11 @@ class VisualRunner {
   startKind(kind) {
     this.currentKind = kind
 
-    const sanitizedKind = sanitize(kind)
+    const normalizedKind = normalizeFilename(kind)
 
-    this.currentShotsDir = path.resolve(this.currentShotsBaseDir, sanitizedKind)
-    this.refShotsDir = path.resolve(this.refShotsBaseDir, sanitizedKind)
-    this.diffsDir = path.resolve(this.diffsBaseDir, sanitizedKind)
+    this.currentShotsDir = path.resolve(this.currentShotsBaseDir, normalizedKind)
+    this.refShotsDir = path.resolve(this.refShotsBaseDir, normalizedKind)
+    this.diffsDir = path.resolve(this.diffsBaseDir, normalizedKind)
 
     removeSync(this.currentShotsDir)
     removeSync(this.diffsDir)
@@ -53,7 +53,7 @@ class VisualRunner {
 
     const screenshots = await captureScreenshots({
       url,
-      baseFilename: sanitize(`${story.name}`),
+      baseName: story.name,
       destDir: this.currentShotsDir,
       ...this.options
     })
@@ -138,10 +138,10 @@ const generateStorybookUrl = (kind, story, {storybookBaseUrl}) => (
   '&selectedStory=' + encodeURIComponent(story)
 )
 
-const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0}) => {
+const captureScreenshots = ({url, baseName, destDir, resolutions=[], delay=0}) => {
   const pageres = new Pageres({
     delay,
-    filename: removeSpaces(baseFilename) + `.<%= size %>`
+    filename: normalizeFilename(baseName) + `.<%= size %>`
   })
 
   pageres.src(url, resolutions, { crop: false })
@@ -149,9 +149,11 @@ const captureScreenshots = ({url, baseFilename, destDir, resolutions=[], delay=0
 
   return pageres.run().then(streams => streams.map(s => ({
     filename: s.filename,
-    name: `${baseFilename} (${filenameToResolution(s.filename)})`
+    name: `${baseName} (${filenameToResolution(s.filename)})`
   })))
 }
+
+const normalizeFilename = (str) => sanitize(removeSpaces(str)).toLowerCase()
 
 const removeSpaces = (str) => str.replace(/\s/g,'_')
 
