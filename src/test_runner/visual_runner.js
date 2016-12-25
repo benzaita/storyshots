@@ -4,6 +4,7 @@ import {existsSync, readFileSync, copySync, mkdirpSync, removeSync} from 'fs-ext
 import imageDiff from 'image-diff';
 import promptly from 'promptly';
 import sanitize from 'sanitize-filename'
+const gm = require('gm').subClass({imageMagick: true});
 
 const debug = require('debug')('storyshots-VisualRunner')
 
@@ -171,13 +172,20 @@ const compareWithReference = ({name, current, reference, diff}) => {
         reject(err)
       }
       else {
-        resolve({
-          name,
-          isMismatch: !imagesAreSame,
-          current,
-          reference,
-          diff
-        })
+        gm(current).montage(reference).montage(diff).geometry('100%').write(diff, (err) => {
+          if (err) {
+            reject(err)
+          }
+          else {
+            resolve({
+              name,
+              isMismatch: !imagesAreSame,
+              current,
+              reference,
+              diff
+            })
+          }
+        });
       }
     })
   })

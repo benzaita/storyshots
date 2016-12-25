@@ -65,6 +65,7 @@
     "chokidar": "^1.6.0",
     "commander": "^2.9.0",
     "fs-extra": "^1.0.0",
+    "gm": "^1.21.1",
     "image-diff": "^1.6.3",
     "jest-diff": "^16.0.0",
     "jest-snapshot": "^16.0.0",

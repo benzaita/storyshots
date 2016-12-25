@@ -60,6 +60,8 @@ var _sanitizeFilename2 = _interopRequireDefault(_sanitizeFilename);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var gm = require('gm').subClass({ imageMagick: true });
+
 var debug = require('debug')('storyshots-VisualRunner');
 
 var VisualRunner = function () {
@@ -441,12 +443,18 @@ var compareWithReference = function compareWithReference(_ref12) {
       if (err) {
         reject(err);
       } else {
-        resolve({
-          name: name,
-          isMismatch: !imagesAreSame,
-          current: current,
-          reference: reference,
-          diff: diff
+        gm(current).montage(reference).montage(diff).geometry('100%').write(diff, function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              name: name,
+              isMismatch: !imagesAreSame,
+              current: current,
+              reference: reference,
+              diff: diff
+            });
+          }
         });
       }
     });
